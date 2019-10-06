@@ -45,13 +45,15 @@ $stateGistBanner = @"
 class WorkflowBuildNum {
     [int]$build_num = 0
     [System.Collections.Generic.Dictionary[
-        string, int]]$version_buildnums
+        string, int]]$version_buildnums =
+            [System.Collections.Generic.Dictionary[string, int]]::new()
 }
 
 class GlobalBuildNum {
     [int]$build_num = 0
     [System.Collections.Generic.Dictionary[
-        string, WorkflowBuildNum]]$workflow_buildnums
+        string, WorkflowBuildNum]]$workflow_buildnums =
+            [System.Collections.Generic.Dictionary[string, WorkflowBuildNum]]::new()
 }
 
 try {
@@ -86,6 +88,17 @@ try {
         }
     }
 
+    if (-not $stateData) {
+        Write-ActionWarning "Not state data found, CREATING STATE DATA"
+        $workflowsState = [WorkflowBuildNum]::new()
+        if ($version_key) {
+            $workflowsState.version_buildnums[$version_key] = 0
+        }
+        $stateData = [GlobalBuildNum]::new()
+        $stateData.workflow_buildnums = $workflowsState
+    }
+
+    Write-ActionInfo ($stateData | ConvertTo-Json)
 }
 catch {
     Write-ActionError "Fatal Exception:  $($Error[0])"
