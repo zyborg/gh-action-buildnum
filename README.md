@@ -1,5 +1,5 @@
 # gh-action-buildnum
-GitHub Action to manage support build numbers in Workflows.
+GitHub Action to implement build numbers in Workflows.
 
 ---
 
@@ -9,10 +9,11 @@ version strings for product releases.
 
 This Action uses a Gist to store persistent state between invocations.
 The OAuth token that is normally made available to GitHub Workflows
-and its Actions does not provide any access to Gists (read or write)
-therefore this Action requires a separate parameter (`gist_token`) for
-an OAuth or PAT token which will be used to read and write the
-_state Gist_.  Note, it is not necessary that the Gist token be associated
+and its Actions (`GITHUB_TOKEN`) does not provide any access to Gists
+(read or write) therefore this Action requires a separate parameter
+(`gist_token`) for an OAuth or PAT token which will be used to read
+and write the _state Gist_.
+Note, it is not necessary that the Gist token be associated
 with the repository in which the Workflow that consumes this Action is
 targeting.  In this way, a separate GitHub account can actually be used
 to store the state.
