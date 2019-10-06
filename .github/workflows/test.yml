@@ -1,0 +1,19 @@
+
+name: test-action
+
+on:
+  push:
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    
+      - name: checkout
+        uses: actions/checkout@v1
+      
+      - name: resolve build nums
+        uses: .
+        with:
+          gist_token: ${{ secrets.GIST_TOKEN }}

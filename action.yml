@@ -1,0 +1,82 @@
+
+## This is a PowerShell-based GitHub Action using:
+##    https://github.com/ebekker/pwsh-github-action-base
+
+name: gh-action-buildnum
+author: EBekker
+description: |
+  Generates build numbers for GitHub Workflow.
+  This Action can be used to generate increasing build numbers
+  per invocation across a number of _scopes_ that can be useful
+  for tracking purposes and defining complete version strings for
+  product releases.
+
+inputs:
+
+  gist_token:
+    required: true
+    description: |
+      GitHub OAuth/PAT token to be used for accessing Gist to store builder number state.
+      The integrated GITHUB_TOKEN that is normally accessible during a Workflow does not
+      include read/write permissions to associated Gists, therefore a separate token is
+      needed.  You can control which account is used to actually store the state by
+      generating a token associated with the target account. 
+
+  repo_full_name:
+    required: false
+    description: |
+      The name of the current repository, in `<OWNER>/<REPO-NAME>` format.
+      This input is optional and is only used to override the default value
+      which is pulled in from the running Workflow context.  This value is
+      used to compute a unique identifier for the Gist that will be used to
+      store state for current and subsequent build numbers.
+      Default is `$env:GITHUB_REPOSITORY`.
+
+  workflow_name:
+    required: false
+    description: |
+      The name of the workflow to identify the build number with.
+      This input is optional and is only used to override the default value
+      which is pulled in from the running Workflow context.  This value is
+      used to compute a unique identifier for the Gist that will be used to
+      store state for current and subsequent build numbers.
+      Default is `$env:GITHUB_WORKFLOW`.
+
+  version_key:
+    required: false
+    description: |
+      A unique identifer used to calculate a version-specific build number.
+
+  skip_bump:
+    required: false
+    description: |
+      If true, this will skip bumping up the build numbers, and only pulls
+      in the last values stored in the state Gist.
+
+  set_env:
+    required: false
+    description: |
+      If true, this will export the resolved version numbers as environment
+      variables for the current and future steps.
+
+outputs:
+
+  global_build_number:
+    description: |
+      Resolved build number for the repository or `global` scope.
+  workflow_build_number:
+    description: |
+      Resolved build number for the Workflow scope.
+  version_build_number:
+    description: |
+      Resolved build number for the Version scope.
+
+branding:
+  color: purple
+  icon: terminal
+
+## Even though the Action logic may be implemented
+## in PWSH, we still need a NodeJS entry point
+runs:
+  using: node12
+  main: _init/index.js
