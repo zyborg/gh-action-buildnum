@@ -93,11 +93,11 @@ class GlobalBuildNum {
         Write-ActionWarning "No state data found, CREATING STATE DATA"
         $stateData = [GlobalBuildNum]::new()
     }
-    if (-not $stateData.workflow_buildnums.Contains($workflow_name)) {
+    if (-not $stateData.workflow_buildnums.ContainsKey($workflow_name)) {
         $stateData.workflow_buildnums[$workflow_name] = [WorkflowBuildNum]::new()
     }
     if ($version_key -and (
-        -not $stateData.workflow_buildnums[$workflow_name].Contains($version_key))) {
+        -not $stateData.workflow_buildnums[$workflow_name].ContainsKey($version_key))) {
         $stateData.workflow_buildnums[$workflow_name][$version_key] = 0
     }
 
