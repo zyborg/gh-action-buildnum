@@ -113,3 +113,46 @@ jobs:
           if ($versBNum -and ($versBNum -ne $versBNumOld)) {
             throw "First and second Version build nums don't match"
           }
+
+      - name: resolve build nums with bump and vers key
+        id: buildnum3
+        uses: ./
+        with:
+          gist_token: ${{ secrets.GIST_TOKEN }}
+          version_key: 0.0.0
+
+      - name: dump and test buildnum outputs \#2
+        shell: pwsh
+        run: |
+          $globBNum = '${{ steps.buildnum3.outputs.global_build_number }}'
+          $wkflBNum = '${{ steps.buildnum3.outputs.workflow_build_number }}'
+          $versBNum = '${{ steps.buildnum3.outputs.version_build_number }}'
+          $globBNumOld = '${{ steps.buildnum1.outputs.global_build_number }}'
+          $wkflBNumOld = '${{ steps.buildnum1.outputs.workflow_build_number }}'
+          $versBNumOld = '${{ steps.buildnum1.outputs.version_build_number }}'
+
+          Write-Output "Got these Build Numbers from Output:"
+          Write-Output "global_build_number   = $globBNum"
+          Write-Output "workflow_build_number = $wkflBNum"
+          Write-Output "version_build_number  = $versBNum"
+
+          if (-not $globBNum) {
+            throw "Missing Global Build Number output"
+          }
+          if (-not $wkflBNum) {
+            throw "Missing Workflow Build Number output"
+          }
+          if (-not $versBNum) {
+            throw "Missing Version Build Number output"
+          }
+
+          $globBNum = $env:BUILDNUM_FOR_GLOBAL
+          $wkflBNum = $env:BUILDNUM_FOR_WORKFLOW
+          $versBNum = $env:BUILDNUM_FOR_VERSION
+
+          if ($globBNum -ne ($globBNumOld + 1)) {
+            throw "Second Global build num should be 1 + old"
+          }
+          if ($wkflBNum -ne $wkflBNumOld + 1)) {
+            throw "Second Workflow build num should be 1 + old"
+          }
