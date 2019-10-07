@@ -124,12 +124,12 @@ jobs:
       - name: dump and test buildnum outputs \#2
         shell: pwsh
         run: |
-          $globBNum = '${{ steps.buildnum3.outputs.global_build_number }}'
-          $wkflBNum = '${{ steps.buildnum3.outputs.workflow_build_number }}'
-          $versBNum = '${{ steps.buildnum3.outputs.version_build_number }}'
-          $globBNumOld = '${{ steps.buildnum1.outputs.global_build_number }}'
-          $wkflBNumOld = '${{ steps.buildnum1.outputs.workflow_build_number }}'
-          $versBNumOld = '${{ steps.buildnum1.outputs.version_build_number }}'
+          $globBNum = [int]'${{ steps.buildnum3.outputs.global_build_number }}'
+          $wkflBNum = [int]'${{ steps.buildnum3.outputs.workflow_build_number }}'
+          $versBNum = [int]'${{ steps.buildnum3.outputs.version_build_number }}'
+          $globBNumOld = [int]'${{ steps.buildnum1.outputs.global_build_number }}'
+          $wkflBNumOld = [int]'${{ steps.buildnum1.outputs.workflow_build_number }}'
+          $versBNumOld = [int]'${{ steps.buildnum1.outputs.version_build_number }}'
 
           Write-Output "Got these Build Numbers from Output:"
           Write-Output "global_build_number   = $globBNum"
