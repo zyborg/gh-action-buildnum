@@ -149,10 +149,6 @@ jobs:
             throw "Missing Version Build Number output"
           }
 
-          $globBNum = $env:BUILDNUM_FOR_GLOBAL
-          $wkflBNum = $env:BUILDNUM_FOR_WORKFLOW
-          $versBNum = $env:BUILDNUM_FOR_VERSION
-
           if ($globBNum -ne ($globBNumOld + 1)) {
             throw "Second Global build num ($($globBNum)) should be 1 + old ($($globBNumOld))"
           }
