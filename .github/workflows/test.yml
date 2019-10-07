@@ -13,7 +13,92 @@ jobs:
       - name: checkout
         uses: actions/checkout@v1
       
-      - name: resolve build nums
+      - name: resolve build nums with bump
+        id: buildnum1
         uses: ./
         with:
           gist_token: ${{ secrets.GIST_TOKEN }}
+
+      - name: dump and test buildnum outputs \#1
+        shell: pwsh
+        run: |
+          $globBNum = '${{ steps.buildnum1.outputs.global_build_number }}'
+          $wkflBNum = '${{ steps.buildnum1.outputs.workflow_build_number }}'
+          $versBNum = '${{ steps.buildnum1.outputs.version_build_number }}'
+
+          Write-Output "Got these Build Numbers from Output:"
+          Write-Output "$globBNum"
+          Write-Output "$wkflBNum"
+          Write-Output "$versBNum"
+
+          if (-not $globBNum) {
+            throw "Missing Global Build Number output"
+          }
+          if (-not $wkflBNum) {
+            throw "Missing Workflow Build Number output"
+          }
+
+          $globBNum = $env:BUILDNUM_FOR_GLOBAL
+          $wkflBNum = $env:BUILDNUM_FOR_WORKFLOW
+          $versBNum = $env:BUILDNUM_FOR_VERSION
+
+          if ($globBNum) {
+            throw "Unexpected - found Global Build Number env var"
+          }
+          if ($wkflBNum) {
+            throw "Unexpected - found Workflow Build Number env var"
+          }
+          if ($versBNum) {
+            throw "Unexpected - found Version Build Number env var"
+          }
+
+      - name: resolve build numbs with skip bump and set env
+        id: buildnum2
+        uses: ./
+        with:
+          gist_token: ${{ secrets.GIST_TOKEN }}
+          skip_bump: true
+          set_env: true
+
+      - name: dump and test buildnum outputs \#2
+        shell: pwsh
+        run: |
+          $globBNum = '${{ steps.buildnum2.outputs.global_build_number }}'
+          $wkflBNum = '${{ steps.buildnum2.outputs.workflow_build_number }}'
+          $versBNum = '${{ steps.buildnum2.outputs.version_build_number }}'
+          $globBNumOld = '${{ steps.buildnum1.outputs.global_build_number }}'
+          $wkflBNumOld = '${{ steps.buildnum1.outputs.workflow_build_number }}'
+          $versBNumOld = '${{ steps.buildnum1.outputs.version_build_number }}'
+
+          Write-Output "Got these Build Numbers from Output:"
+          Write-Output "$globBNum"
+          Write-Output "$wkflBNum"
+          Write-Output "$versBNum"
+
+          if (-not $globBNum) {
+            throw "Missing Global Build Number output"
+          }
+          if (-not $wkflBNum) {
+            throw "Missing Workflow Build Number output"
+          }
+
+          $globBNum = $env:BUILDNUM_FOR_GLOBAL
+          $wkflBNum = $env:BUILDNUM_FOR_WORKFLOW
+          $versBNum = $env:BUILDNUM_FOR_VERSION
+
+          if (-not $globBNum) {
+            throw "Missing Global Build Number env var"
+          }
+          if (-not $wkflBNum) {
+            throw "Missing Workflow Build Number env var"
+          }
+
+          if ($globBNum -ne $globBNumOld) {
+            throw "First and second Global build nums don't match"
+          }
+          if ($wkflBNum -ne $wkflBNumOld) {
+            throw "First and second Workflow build nums don't match"
+          }
+          if ($versBNum -and ($versBNum -ne $versBNumOld)) {
+            throw "First and second Version build nums don't match"
+          }
