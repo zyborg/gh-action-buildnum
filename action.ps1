@@ -62,152 +62,127 @@ class GlobalBuildNum {
             [System.Collections.Generic.Dictionary[string, WorkflowBuildNum]]::new()
 }
 
-# # # try {
 
-    ## Request all Gists for the current user
-    $listGistsResp = Invoke-WebRequest -Headers $apiHeaders -Uri $gistsApiUrl
+## Request all Gists for the current user
+$listGistsResp = Invoke-WebRequest -Headers $apiHeaders -Uri $gistsApiUrl
 
-    ## Parse response content as JSON
-    $listGists = $listGistsResp.Content | ConvertFrom-Json -AsHashtable
-    Write-ActionInfo "Got [$($listGists.Count)] Gists for current account"
+## Parse response content as JSON
+$listGists = $listGistsResp.Content | ConvertFrom-Json -AsHashtable
+Write-ActionInfo "Got [$($listGists.Count)] Gists for current account"
 
-    ## Isolate the first Gist with a file matching the expected metadata name
-    $stateGist = $listGists | Where-Object { $_.files.$stateGistName } | Select-Object -First 1
-    $stateData = $null
+## Isolate the first Gist with a file matching the expected metadata name
+$stateGist = $listGists | Where-Object { $_.files.$stateGistName } | Select-Object -First 1
+$stateData = $null
 
-    if ($stateGist) {
-        Write-ActionInfo "Found the build number state!"
- 
-        $stateDataRawUrl = $stateGist.files.$stateGistName.raw_url
-        Write-ActionInfo "Fetching state content from Raw Url"
- 
-        $stateDataRawResp = Invoke-WebRequest -Headers $apiHeaders -Uri $stateDataRawUrl
-        $stateDataContent = $stateDataRawResp.Content
-        $stateData = $stateDataContent | ConvertFrom-Json -AsHashtable -ErrorAction Continue
-        if (-not $stateData) {
-            Write-ActionWarning "State content seems to be either missing or unparsable JSON:"
-            Write-ActionWarning "[$($stateGist.files.$stateGistName)]"
-            Write-ActionWarning "[$stateDataContent]"
-            Write-ActionWarning "RESETTING STATE DATA"
-        }
-        else {
-            Write-Information "Got state data"
-        }
-    }
+if ($stateGist) {
+    Write-ActionInfo "Found the build number state!"
 
-    ## Create initial global state data if it doesn't exist
+    $stateDataRawUrl = $stateGist.files.$stateGistName.raw_url
+    Write-ActionInfo "Fetching state content from Raw Url"
+
+    $stateDataRawResp = Invoke-WebRequest -Headers $apiHeaders -Uri $stateDataRawUrl
+    $stateDataContent = $stateDataRawResp.Content
+    $stateData = $stateDataContent | ConvertFrom-Json -AsHashtable -ErrorAction Continue
     if (-not $stateData) {
-        Write-ActionWarning "BuildNum state for Repo not found, INITIALIZING"
-        $stateData = [GlobalBuildNum]::new()
+        Write-ActionWarning "State content seems to be either missing or unparsable JSON:"
+        Write-ActionWarning "[$($stateGist.files.$stateGistName)]"
+        Write-ActionWarning "[$stateDataContent]"
+        Write-ActionWarning "RESETTING STATE DATA"
     }
-
-    ## Create initial state data for current workflow if it doesn't exist
-    if (-not $stateData.workflow_buildnums.ContainsKey($workflow_name)) {
-        Write-ActionDebug "BuildNum state for Workflow not found, initializing"
-        $stateData.workflow_buildnums[$workflow_name] = [WorkflowBuildNum]::new()
+    else {
+        Write-Information "Got state data"
     }
+}
 
-    ## Create initial state data for specified version key if it doesn't exist
-    if ($version_key -and (-not $stateData.workflow_buildnums[
-            $workflow_name].version_buildnums.ContainsKey($version_key))) {
-        Write-ActionDebug "BuildNum state for Version not found, initializing"
-        $stateData.workflow_buildnums[$workflow_name].version_buildnums[$version_key] =
-            [VersionBuildNum]::new()
-    }
+## Create initial global state data if it doesn't exist
+if (-not $stateData) {
+    Write-ActionWarning "BuildNum state for Repo not found, INITIALIZING"
+    $stateData = [GlobalBuildNum]::new()
+}
 
-    if (-not $stateGist) {
-        Write-ActionInfo "Creating initial state Gist"
-        $createGistResp = Invoke-WebRequest -Headers $apiHeaders -Uri $gistsApiUrl -Method Post -Body (@{
-            public = $false
-            files = @{
-                $stateGistName = @{
-                    content = @"
+## Create initial state data for current workflow if it doesn't exist
+if (-not $stateData.workflow_buildnums.ContainsKey($workflow_name)) {
+    Write-ActionDebug "BuildNum state for Workflow not found, initializing"
+    $stateData.workflow_buildnums[$workflow_name] = [WorkflowBuildNum]::new()
+}
+
+## Create initial state data for specified version key if it doesn't exist
+if ($version_key -and (-not $stateData.workflow_buildnums[
+        $workflow_name].version_buildnums.ContainsKey($version_key))) {
+    Write-ActionDebug "BuildNum state for Version not found, initializing"
+    $stateData.workflow_buildnums[$workflow_name].version_buildnums[$version_key] =
+        [VersionBuildNum]::new()
+}
+
+if (-not $stateGist) {
+    Write-ActionInfo "Creating initial state Gist"
+    $createGistResp = Invoke-WebRequest -Headers $apiHeaders -Uri $gistsApiUrl -Method Post -Body (@{
+        public = $false
+        files = @{
+            $stateGistName = @{
+                content = @"
 $stateGistBanner
 $($stateData | ConvertTo-Json -Depth 10)
 "@
-                }
             }
-        } | ConvertTo-Json)
-        $createGist = $createGistResp.Content | ConvertFrom-Json -AsHashtable
-        $stateGist = $createGist
+        }
+    } | ConvertTo-Json)
+    $createGist = $createGistResp.Content | ConvertFrom-Json -AsHashtable
+    $stateGist = $createGist
+}
+
+Write-ActionDebug "Resolved starting state data:"
+Write-ActionDebug ($stateData | ConvertTo-Json -Depth 10)
+
+if (-not $skip_bump) {
+    Write-ActionInfo "Bumping up version numbers"
+
+    $stateData.build_num += 1;
+    Write-Debug "New Global build_num = [$($stateData.build_num)]"
+
+    $stateData.workflow_buildnums[$workflow_name].build_num += 1;
+    Write-Debug "New Workflow build_num = [$($stateData.workflow_buildnums[$workflow_name].build_num)]"
+
+    if ($version_key) {
+        $stateData.workflow_buildnums[$workflow_name].version_buildnums[
+            $version_key].build_num += 1
+        Write-Debug "New Workflow build_num = [$($stateData.workflow_buildnums[$workflow_name].version_buildnums[
+            $version_key].build_num)]"
     }
 
-    Write-ActionDebug "Resolved starting state data:"
+    Write-ActionDebug "Resolved updated state data:"
     Write-ActionDebug ($stateData | ConvertTo-Json -Depth 10)
 
-    if (-not $skip_bump) {
-        Write-ActionInfo "Bumping up version numbers"
-
-        $stateData.build_num += 1;
-        Write-Debug "New Global build_num = [$($stateData.build_num)]"
-
-        $stateData.workflow_buildnums[$workflow_name].build_num += 1;
-        Write-Debug "New Workflow build_num = [$($stateData.workflow_buildnums[$workflow_name].build_num)]"
-
-        if ($version_key) {
-            $stateData.workflow_buildnums[$workflow_name].version_buildnums[
-                $version_key].build_num += 1
-            Write-Debug "New Workflow build_num = [$($stateData.workflow_buildnums[$workflow_name].version_buildnums[
-                $version_key].build_num)]"
-        }
-
-        Write-ActionDebug "Resolved updated state data:"
-        Write-ActionDebug ($stateData | ConvertTo-Json -Depth 10)
-
-        Write-ActionInfo "Updating state Gist"
-        $updateGistUrl = "$gistsApiUrl/$($stateGist.id)"
-        $updateGistResp = Invoke-WebRequest -Headers $apiHeaders -Uri $updateGistUrl -Method Patch -Body (@{
-            files = @{
-                $stateGistName = @{
-                    content = @"
+    Write-ActionInfo "Updating state Gist"
+    $updateGistUrl = "$gistsApiUrl/$($stateGist.id)"
+    $updateGistResp = Invoke-WebRequest -Headers $apiHeaders -Uri $updateGistUrl -Method Patch -Body (@{
+        files = @{
+            $stateGistName = @{
+                content = @"
 $stateGistBanner
 $($stateData | ConvertTo-Json -Depth 10)
 "@
-                }
             }
-        } | ConvertTo-Json)
-    }
+        }
+    } | ConvertTo-Json)
+}
 
-    Write-ActionDebug "Setting outputs"
-    Set-ActionOutput global_build_number ($stateData.build_num)
-    Set-ActionOutput workflow_build_number ($stateData.workflow_buildnums[
+Write-ActionDebug "Setting outputs"
+Set-ActionOutput global_build_number ($stateData.build_num)
+Set-ActionOutput workflow_build_number ($stateData.workflow_buildnums[
+    $workflow_name].build_num)
+if ($version_key) {
+    Set-ActionOutput version_build_number ($stateData.workflow_buildnums[
+        $workflow_name].version_buildnums[$version_key].build_num)
+}
+
+if ($set_env) {
+    Write-ActionDebug "Setting env vars"
+    Set-ActionVariable BUILDNUM_FOR_GLOBAL ($stateData.build_num)
+    Set-ActionVariable BUILDNUM_FOR_WORKFLOW ($stateData.workflow_buildnums[
         $workflow_name].build_num)
     if ($version_key) {
-        Set-ActionOutput version_build_number ($stateData.workflow_buildnums[
+        Set-ActionVariable BUILDNUM_FOR_VERSION ($stateData.workflow_buildnums[
             $workflow_name].version_buildnums[$version_key].build_num)
     }
-
-    if ($set_env) {
-        Write-ActionDebug "Setting env vars"
-        Set-ActionVariable BUILDNUM_FOR_GLOBAL ($stateData.build_num)
-        Set-ActionVariable BUILDNUM_FOR_WORKFLOW ($stateData.workflow_buildnums[
-            $workflow_name].build_num)
-        if ($version_key) {
-            Set-ActionVariable BUILDNUM_FOR_VERSION ($stateData.workflow_buildnums[
-                $workflow_name].version_buildnums[$version_key].build_num)
-        }
-    }
-
-# # # }
-# # # catch {
-# # #     Write-ActionError "Fatal Exception:  $($Error[0])"
-# # #     exit
-# # # }
-
-
-
-
-
-
-# $greeting = "$($salutation) $($audience)!"
-
-# ## Persist the greeting in the environment for all subsequent steps
-# Set-ActionVariable -Name build_greeting -Value greeting
-
-# ## Expose the greeting as an output value of this step instance
-# Set-ActionOutput -Name greeting -Value $greeting
-
-# ## Write it out to the log for good measure
-# Write-ActionInfo $greeting
-
-
+}
