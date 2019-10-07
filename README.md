@@ -3,6 +3,11 @@ GitHub Action to implement build numbers in Workflows.
 
 ---
 
+[![GitHub WorkFlow - test-action](https://github.com/zyborg/gh-action-buildnum/workflows/CI/badge.svg)](https://github.com/zyborg/gh-action-buildnum/actions?workflow=test-action)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/zyborg/gh-action-buildnum)](https://github.com/zyborg/gh-action-buildnum/releases/latest)
+
+---
+
 This Action can be used to generate increasing build numbers across a number
 of _scopes_ that can be useful for tracking purposes and defining complete
 version strings for product releases.
@@ -80,7 +85,7 @@ This Action defines the following formal outputs.
 
 | Name | Description |
 |-|-|
-| **`global_build_number`**   | Resolved build number for the repository or `global` scope.
+| **`global_build_number`**   | Resolved build number for the repository or Global scope.
 | **`workflow_build_number`** | Resolved build number for the Workflow scope.
 | **`version_build_number`**  | Resolved build number for the Version scope.
 
@@ -90,9 +95,11 @@ If the `set_env` input is true, then the following environment variables will be
 
 | Name | Description |
 |-|-|
-| **`BUILDNUM_FOR_GLOBAL`**   | Resolved build number for the repository or `global` scope.
+| **`BUILDNUM_FOR_GLOBAL`**   | Resolved build number for the repository or Global scope.
 | **`BUILDNUM_FOR_WORKFLOW`** | Resolved build number for the Workflow scope.
 | **`BUILDNUM_FOR_VERSION`**  | Resolved build number for the Version scope.
+
+## Miscellaneous
 
 ## State Gist
 
@@ -118,3 +125,7 @@ Here is a sample.
   "build_num": 13
 }
 ```
+
+### PowerShell GitHub Action
+
+This Action is implemented as a [PowerShell GitHub Action](https://github.com/ebekker/pwsh-github-action-base).

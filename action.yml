@@ -5,8 +5,8 @@
 name: gh-action-buildnum
 author: EBekker
 description: |
-  Generates increasing build numbers for GitHub Workflow runs,
-  across a number of _scopes_ useful for build tracking and versioning.
+  Generates build numbers for Workflow runs, across a number
+  of _scopes_ useful for build tracking and versioning.
 
 inputs:
 
