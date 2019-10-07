@@ -153,6 +153,6 @@ jobs:
           if ($globBNum -ne ($globBNumOld + 1)) {
             throw "Second Global build num should be 1 + old"
           }
-          if ($wkflBNum -ne $wkflBNumOld + 1)) {
+          if ($wkflBNum -ne ($wkflBNumOld + 1)) {
             throw "Second Workflow build num should be 1 + old"
           }
