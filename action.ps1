@@ -89,19 +89,27 @@ class GlobalBuildNum {
         }
     }
 
+    ## Create initial global state data if it doesn't exist
     if (-not $stateData) {
-        Write-ActionWarning "No state data found, CREATING STATE DATA"
+        Write-ActionWarning "BuildNum state for Repo not found, INITIALIZING"
         $stateData = [GlobalBuildNum]::new()
     }
+
+    ## Create initial state data for current workflow if it doesn't exist
     if (-not $stateData.workflow_buildnums.ContainsKey($workflow_name)) {
+        Write-ActionDebug "BuildNum state for Workflow not found, initializing"
         $stateData.workflow_buildnums[$workflow_name] = [WorkflowBuildNum]::new()
     }
+
+    ## Create initial state data for specified version key if it doesn't exist
     if ($version_key -and (
         -not $stateData.workflow_buildnums[$workflow_name].ContainsKey($version_key))) {
+        Write-ActionDebug "BuildNum state for Version not found, initializing"
         $stateData.workflow_buildnums[$workflow_name][$version_key] = 0
     }
 
-    Write-ActionInfo ($stateData | ConvertTo-Json)
+    Write-ActionDebug "Resolved current state data:"
+    Write-ActionDebug ($stateData | ConvertTo-Json -Depth 10)
 
 # # # }
 # # # catch {
