@@ -96,7 +96,9 @@ class GlobalBuildNum {
             $workflowsState.version_buildnums[$version_key] = 0
         }
         $stateData = [GlobalBuildNum]::new()
-        $stateData.workflow_buildnums = $workflowsState
+        $stateData.workflow_buildnums = @{
+            $workflow_name = $workflowsState
+        }
     }
 
     Write-ActionInfo ($stateData | ConvertTo-Json)
