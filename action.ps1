@@ -155,10 +155,10 @@ $($stateData | ConvertTo-Json -Depth 10)
         Write-ActionDebug ($stateData | ConvertTo-Json -Depth 10)
 
         Write-ActionInfo "Updating state Gist"
-        $patchGistUrl = "$gistsApiUrl/$($metadataGist.id)"
-        $patchGistResp = Invoke-WebRequest -Headers $apiHeaders -Uri $patchGistUrl -ErrorAction Stop -Method Patch -Body (@{
+        $updateGistUrl = "$gistsApiUrl/$($stateGist.id)"
+        $updateGistResp = Invoke-WebRequest -Headers $apiHeaders -Uri $updateGistUrl -Method Patch -Body (@{
             files = @{
-                $metadataFilename = @{
+                $stateGistName = @{
                     content = @"
 $stateGistBanner
 $($stateData | ConvertTo-Json -Depth 10)
