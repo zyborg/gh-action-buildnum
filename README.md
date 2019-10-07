@@ -3,7 +3,7 @@ GitHub Action to implement build numbers in Workflows.
 
 ---
 
-[![GitHub WorkFlow - test-action](https://github.com/zyborg/gh-action-buildnum/workflows/CI/badge.svg)](https://github.com/zyborg/gh-action-buildnum/actions?workflow=test-action)
+[![GitHub WorkFlow - test-action](https://github.com/zyborg/gh-action-buildnum/workflows/test-action/badge.svg)](https://github.com/zyborg/gh-action-buildnum/actions?workflow=test-action)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/zyborg/gh-action-buildnum)](https://github.com/zyborg/gh-action-buildnum/releases/latest)
 
 ---
@@ -18,15 +18,48 @@ and its Actions (`GITHUB_TOKEN`) does not provide any access to Gists
 (read or write) therefore this Action requires a separate parameter
 (`gist_token`) for an OAuth or PAT token which will be used to read
 and write the _state Gist_.
-Note, it is not necessary that the Gist token be associated
-with the repository in which the Workflow that consumes this Action is
-targeting.  In this way, a separate GitHub account can actually be used
-to store the state.
+
+> NOTE: it is not necessary that the Gist token be associated
+> with the repository in which the Workflow that consumes this Action is
+> targeting.  In this way, a separate GitHub account can actually be used
+> to store the state.
 
 > NOTE: this action does include some debug messaging so if you need
 > to troubleshoot its behavior, you can enable debug logging using
 > the `ACTIONS_STEP_DEBUG` secrets variable.  You can find more info
 > [here](https://help.github.com/en/articles/development-tools-for-github-actions#set-a-debug-message-debug).
+
+## Usage
+
+Here is a quick sample of how to use this action in your own Workflows:
+
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: generate build number
+      uses: zyborg/gh-action-buildnum@v1 
+      with:
+        gist_token: ${{ secrets.GIST_TOKEN }}
+        set_env: true
+
+    - name: print repo global build number
+      run: echo Global Build Number is $BUILDNUM_FOR_GLOBAL
+
+    - name: get existing build number
+      uses: zyborg/gh-action-buildnum@v1
+      id: lastBuildNum
+      with:
+        gist_token: ${{ secrets.GIST_TOKEN }}
+        skip_bump: true
+
+    - name: dump last build num
+      run: |
+        echo Global Build Number is ${{ steps.lastBuildNum.outputs.global_buildnum }}
+        echo Workflow Build Number is ${{ steps.lastBuildNum.outputs.workflow_buildnum }}
+
+```
 
 ## Scopes
 
