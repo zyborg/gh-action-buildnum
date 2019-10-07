@@ -93,3 +93,28 @@ If the `set_env` input is true, then the following environment variables will be
 | **`BUILDNUM_FOR_GLOBAL`**   | Resolved build number for the repository or `global` scope.
 | **`BUILDNUM_FOR_WORKFLOW`** | Resolved build number for the Workflow scope.
 | **`BUILDNUM_FOR_VERSION`**  | Resolved build number for the Version scope.
+
+## State Gist
+
+This Action uses a Gist file to store the state of build numbers across Workflow runs.
+
+Here is a sample.
+
+```JSON
+/* THIS FILE IS AUTO-GENERATED AND MANAGED BY GITHUB ACTIONS. MANUAL MODIFICATIONS
+** CAN BREAK THINGS IF YOU DO NOT KNOW WHAT YOU ARE DOING! *YOU* HAVE BEEN WARNED!
+*/
+{
+  "workflow_buildnums": {
+    "test-action": {
+      "version_buildnums": {
+        "0.0.0": {
+          "build_num": 5
+        }
+      },
+      "build_num": 13
+    }
+  },
+  "build_num": 13
+}
+```
