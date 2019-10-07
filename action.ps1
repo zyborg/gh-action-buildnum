@@ -56,7 +56,8 @@ class GlobalBuildNum {
             [System.Collections.Generic.Dictionary[string, WorkflowBuildNum]]::new()
 }
 
-try {
+# # # try {
+
     ## Request all Gists for the current user
     $listGistsResp = Invoke-WebRequest -Headers $apiHeaders -Uri $gistsApiUrl
 
@@ -99,11 +100,12 @@ try {
     }
 
     Write-ActionInfo ($stateData | ConvertTo-Json)
-}
-catch {
-    Write-ActionError "Fatal Exception:  $($Error[0])"
-    return
-}
+
+# # # }
+# # # catch {
+# # #     Write-ActionError "Fatal Exception:  $($Error[0])"
+# # #     exit
+# # # }
 
 
 
