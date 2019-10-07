@@ -18,6 +18,11 @@ with the repository in which the Workflow that consumes this Action is
 targeting.  In this way, a separate GitHub account can actually be used
 to store the state.
 
+> NOTE: this action does include some debug messaging so if you need
+> to troubleshoot its behavior, you can enable debug logging using
+> the `ACTIONS_STEP_DEBUG` secrets variable.  You can find more info
+> [here](https://help.github.com/en/articles/development-tools-for-github-actions#set-a-debug-message-debug).
+
 ## Scopes
 
 When this action runs it generates several build numbers that are relative
