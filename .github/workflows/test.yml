@@ -132,9 +132,12 @@ jobs:
           $versBNumOld = [int]'${{ steps.buildnum1.outputs.version_build_number }}'
 
           Write-Output "Got these Build Numbers from Output:"
-          Write-Output "global_build_number   = $globBNum"
-          Write-Output "workflow_build_number = $wkflBNum"
-          Write-Output "version_build_number  = $versBNum"
+          Write-Output "    global_build_number   = $globBNum"
+          Write-Output "    workflow_build_number = $wkflBNum"
+          Write-Output "    version_build_number  = $versBNum"
+          Write-Output "old global_build_number   = $globBNumOld"
+          Write-Output "old workflow_build_number = $wkflBNumOld"
+          Write-Output "old version_build_number  = $versBNumOld"
 
           if (-not $globBNum) {
             throw "Missing Global Build Number output"
@@ -151,8 +154,8 @@ jobs:
           $versBNum = $env:BUILDNUM_FOR_VERSION
 
           if ($globBNum -ne ($globBNumOld + 1)) {
-            throw "Second Global build num should be 1 + old"
+            throw "Second Global build num ($($globBNum)) should be 1 + old ($($globBNumOld))"
           }
           if ($wkflBNum -ne ($wkflBNumOld + 1)) {
-            throw "Second Workflow build num should be 1 + old"
+            throw "Second Workflow build num ($($wkflBNum)) should be 1 + old ($($wkflBNumOld))"
           }
