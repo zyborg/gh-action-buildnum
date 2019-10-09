@@ -51,7 +51,7 @@ class VersionBuildNum {
 class WorkflowBuildNum {
     [int]$build_num = 0
     [System.Collections.Generic.Dictionary[
-        string, int]]$version_buildnums =
+        string, VersionBuildNum]]$version_buildnums =
             [System.Collections.Generic.Dictionary[string, VersionBuildNum]]::new()
 }
 
