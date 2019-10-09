@@ -2,7 +2,7 @@
 
 $ErrorActionPreference = "STOP"
 
-. ./lib/ActionsCore.ps1
+. $PSScriptRoot/lib/ActionsCore.ps1
 
 ## Pull in some inputs
 $gist_token     = Get-ActionInput gist_token -Required
