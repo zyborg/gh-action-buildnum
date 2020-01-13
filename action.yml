@@ -2,7 +2,7 @@
 ## This is a PowerShell-based GitHub Action using:
 ##    https://github.com/ebekker/pwsh-github-action-base
 
-name: gh-action-buildnum2
+name: gh-action-buildnum
 author: EBekker
 description: |
   Generates build numbers for Workflow runs, across a number
