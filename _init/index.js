@@ -66,8 +66,7 @@ const exec = __webpack_require__(871);
 
 async function run() {
     try {
-        const pwshFolder = __dirname.replace(/_init$/, '');
-        const pwshScript = `${pwshFolder}/action.ps1`
+        const pwshScript = __dirname.replace(/_init$/, 'action.ps1');        
         await exec.exec('pwsh', [ '-f', pwshScript ]);
     } catch (error) {
         core.setFailed(error.message);
