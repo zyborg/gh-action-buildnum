@@ -27,9 +27,7 @@ function Set-ActionVariable {
     }
 
     ## To take effect for all subsequent actions/steps
-    Send-ActionCommand set-env @{
-        name = $Name
-    } -Message $Value
+    Write-ActionEnvVariable -Name $Name -Value $Value
 }
 
 <#
@@ -70,7 +68,7 @@ function Add-ActionPath {
     }
 
     ## To take effect for all subsequent actions/steps
-    Send-ActionCommand add-path $Path
+    Write-ActionEnvPath -Path $Path
 }
 
 ## Used to identify inputs from env vars in Action/Workflow context
@@ -311,6 +309,38 @@ function Send-ActionCommand {
     $cmdStr += [System.Environment]::NewLine
 
     return $cmdStr
+}
+
+function Write-ActionEnvVariable {
+    param(
+        [Parameter(Position=0, Mandatory)]
+        [string]$Name,
+        [Parameter(Position=1, Mandatory)]
+        [string]$Value,
+
+        [nullable[bool]]$Multiline
+    )
+
+    if ($Multiline -eq $null) {
+        $Multiline = $Value.Contains("`r") -or $Value.Contains("`n")
+    }
+
+    if ($Multiline) {
+        $delim = [Guid]::NewGuid().ToString().Replace('-', '')
+        Add-Content -Encoding utf8NoBOM -Path $env:GITHUB_ENV -Value "$($Name)<<$($delim)`n$($Value)`n$($delim)"
+    }
+    else {
+        Add-Content -Encoding utf8NoBOM -Path $env:GITHUB_ENV -Value "$($Name)=$($Value)"
+    }
+}
+
+function Write-ActionEnvPath {
+    param(
+        [Parameter(Position=0, Mandatory)]
+        [string]$Path
+    )
+
+    Add-Content -Encoding utf8NoBOM -Path $env:GITHUB_PATH -Value $Path
 }
 
 function ConvertTo-EscapedData {
