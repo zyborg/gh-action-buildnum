@@ -1,6 +1,8 @@
 # gh-action-buildnum
 GitHub Action to implement build numbers in Workflows.
 
+:star: I appreciate your star, it helps me decide to which OSS projects I should allocate my spare time.
+
 ---
 
 [![GitHub WorkFlow - test-action](https://github.com/zyborg/gh-action-buildnum/workflows/test-action/badge.svg)](https://github.com/zyborg/gh-action-buildnum/actions?workflow=test-action)
