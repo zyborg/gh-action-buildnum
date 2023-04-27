@@ -135,9 +135,7 @@ function Set-ActionOutput {
         [string]$Value
     )
 
-    Send-ActionCommand set-output @{
-        name = $Name
-    } -Message $Value
+    Write-ActionOutputVariable -Name $Name -Value $Value
 }
 
 <#
@@ -309,6 +307,29 @@ function Send-ActionCommand {
     $cmdStr += [System.Environment]::NewLine
 
     return $cmdStr
+}
+
+function Write-ActionOutputVariable {
+    param(
+        [Parameter(Position=1, Mandatory)]
+        [string]$Name,
+        [Parameter(Position=1, Mandatory)]
+        [string]$Value,
+
+        [nullable[bool]]$Multiline
+    )
+
+    if ($Multiline -eq $null) {
+        $Multiline = $Value.Contains("`r") -or $Value.Contains("`n")
+    }
+
+    if ($Multiline) {
+        $delim = [Guid]::NewGuid().ToString().Replace('-', '')
+        Add-Content -Encoding utf8NoBOM -Path $env:GITHUB_OUTPUT -Value "$($Name)<<$($delim)`n$($Value)`n$($delim)"
+    }
+    else {
+        Add-Content -Encoding utf8NoBOM -Path $env:GITHUB_OUTPUT -Value "$($Name)=$($Value)"
+    }
 }
 
 function Write-ActionEnvVariable {
